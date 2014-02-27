@@ -45,9 +45,15 @@ target=$(mktemp -d --tmpdir $(basename $0).XXXXXX)
 
 set -x
 
-for dev in console null zero urandom; do
-    /sbin/MAKEDEV -d "$target"/dev -x $dev
-done
+#for dev in console null zero urandom; do
+#    /sbin/MAKEDEV -d "$target"/dev -x $dev
+#done
+
+mkdir "$target"/dev
+mknod "$target"/dev/null c 1 3
+mknod "$target"/dev/zero c 1 5
+mknod "$target"/dev/urandom c 1 9
+mknod "$target"/dev/console c 5 1
 
 yum -c "$yum_config" --installroot="$target" --setopt=tsflags=nodocs \
     --setopt=group_package_types=mandatory -y groupinstall Core
