@@ -10,7 +10,7 @@ import (
 )
 
 // Context is a generic key value pair that allows
-// arbatrary data to be sent
+// arbitrary data to be sent
 type Context map[string]string
 
 var (
@@ -81,7 +81,7 @@ type TtyTerminal interface {
 }
 
 type Driver interface {
-	Run(c *Command, pipes *Pipes, startCallback StartCallback) (int, error) // Run executes the process and blocks until the process exits and returns the exit code
+	Run(c *Command, pipes *Pipes, startCallback StartCallback) (int, error) // Execute the command, block until the command's process exits, and return the exit code
 	Kill(c *Command, sig int) error
 	Pause(c *Command) error
 	Unpause(c *Command) error
@@ -120,7 +120,8 @@ type Mount struct {
 	Private     bool   `json:"private"`
 }
 
-// Process wrapps an os/exec.Cmd to add more metadata
+// Command defines a process to be run in a container and holds details of the process while it is running.
+// It wrapps an os/exec.Cmd to add more metadata.
 type Command struct {
 	exec.Cmd `json:"-"`
 
@@ -146,8 +147,8 @@ type Command struct {
 	ContainerPid int      `json:"container_pid"` // the pid for the process inside a container
 }
 
-// Return the pid of the process
-// If the process is nil -1 will be returned
+// Return the pid of the command's process
+// or -1 if the command does not have a running process
 func (c *Command) Pid() int {
 	return c.ContainerPid
 }
