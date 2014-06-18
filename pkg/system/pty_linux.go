@@ -3,9 +3,30 @@ package system
 import (
 	"fmt"
 	"os"
+	"os/exec"
 	"syscall"
 	"unsafe"
 )
+
+func Grantpt(f *os.File) error {
+	fmt.Printf("Grantpt %v\n", f)
+	slave, err := Ptsname(f)
+	if err != nil {
+		fmt.Println("Ptsname error = ", err)
+		return err
+	}
+	err = syscall.Chmod(slave, syscall.S_IRUSR | syscall.S_IWUSR | syscall.S_IWGRP | syscall.S_IROTH | syscall.S_IWOTH)
+	fmt.Println("Chmod return value = ", err)
+	// dump some diagnostics
+	cmd := exec.Command("ls", "-l", "/dev/pts")
+	if output, err := cmd.Output(); err == nil {
+	   fmt.Println("ln -l: ", string(output[:]))
+	} else {
+	  fmt.Println("Output error = ", err)
+	}
+	//
+	return err
+}
 
 // Unlockpt unlocks the slave pseudoterminal device corresponding to the master pseudoterminal referred to by f.
 // Unlockpt should be called before opening the slave side of a pseudoterminal.
@@ -33,6 +54,9 @@ func CreateMasterAndConsole() (*os.File, string, error) {
 	}
 	console, err := Ptsname(master)
 	if err != nil {
+		return nil, "", err
+	}
+	if err := Grantpt(master); err != nil {
 		return nil, "", err
 	}
 	if err := Unlockpt(master); err != nil {
